@@ -14,17 +14,20 @@ return new class extends Migration
         Schema::create('order_list', function (Blueprint $table) {
             $table->uuid('order_list_id')->primary();
             $table->foreignUuid('order_id')
-            ->references('order_id')
-            ->on('orders')
-            ->onDelete('cascade')
-            ->onUpdate('cascade');
+                ->references('order_id')
+                ->on('orders')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
             $table->foreignUuid('item_id')
-            ->references('item_id')
-            ->on('items')
-            ->onDelete('cascade')
-            ->onUpdate('cascade');
-            $table->integer('order_quantity')->nullable();
-            $table->float('order_price')->nullable();
+                ->references('item_id')
+                ->on('items')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
+            $table->string('status'); // pending , incomplete, complete
+            $table->float('order_quantity')->nullable();
+            $table->float('order_completed')->nullable();
+            $table->float('price_per_item')->nullable();
+            $table->boolean('archived')->default(false);
             $table->timestamps();
         });
     }

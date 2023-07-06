@@ -13,24 +13,20 @@ return new class extends Migration
     {
         Schema::create('items', function (Blueprint $table) {
             $table->uuid('item_id')->primary();
-            $table->string('item_name');
-            $table->string('item_description');
-            $table->float('item_price');
-            $table->integer('item_quantity');
+            $table->string('item_name')->nullable();
+            $table->string('item_description')->nullable();
+            $table->foreignUuid('unit_id')->nullable()
+                ->references('unit_id')
+                ->on('units')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
             $table->string('item_image')->nullable();
-            $table->foreignUuid('category_id')
-            ->references('category_id')
-            ->on('categories')
-            ->onDelete('cascade')
-            ->onUpdate('cascade');
-            $table->foreignUuid('supplier_id')
-            ->nullable()
-            ->references('id')
-            ->on('users')
-            ->onDelete('cascade')
-            ->onUpdate('cascade');
+            $table->foreignUuid('category_id')->nullable()
+                ->references('category_id')
+                ->on('categories')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
             $table->timestamps();
-
         });
     }
 

@@ -16,35 +16,34 @@ class RequestList extends Model
      * @var array<int, string>
      */
 
-     protected $table = 'request_list';
-     protected $primaryKey = 'request_list_id';
-     protected $keyType = 'string';
+    protected $table = 'request_list';
+    protected $primaryKey = 'request_list_id';
+    protected $keyType = 'string';
 
-     protected $fillable = [
-         'request_id',
-         'item_id',
-         'status',
-         'request_quantity',
-         'request_approved',
-         'request_disapproved'
+    protected $fillable = [
+        'request_id',
+        'item_id',
+        'status',
+        'request_quantity',
+        'request_approved',
+        'request_disapproved',
+        'archived',
+    ];
 
 
-     ];
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'request_quantity' => 'float',
+        'request_approved' => 'float',
+        'request_disapproved' => 'float',
 
+    ];
 
-     /**
-      * The attributes that should be cast.
-      *
-      * @var array<string, string>
-      */
-     protected $casts = [
-        'request_quantity' => 'integer',
-        'request_approved' => 'integer',
-        'request_disapproved' => 'integer',
-
-     ];
-
-     public function request()
+    public function request()
     {
         return $this->belongsTo(Request::class, 'request_id', 'request_id');
     }

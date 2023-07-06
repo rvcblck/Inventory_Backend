@@ -25,6 +25,7 @@ class Item extends Model
         'item_description',
         'item_price',
         'item_quantity',
+        'unit_id',
         'item_image',
         'category_id',
         'supplier_id',
@@ -51,6 +52,16 @@ class Item extends Model
         return $this->belongsTo(Category::class, 'category_id', 'category_id');
     }
 
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class, 'unit_id', 'unit_id');
+    }
+
+    public function quantity()
+    {
+        return $this->hasMany(ItemQuantity::class, 'item_id', 'item_id');
+    }
+
     public function restocks()
     {
         return $this->hasMany(Restock::class, 'item_id', 'item_id');
@@ -64,5 +75,10 @@ class Item extends Model
     public function suppliers()
     {
         return $this->hasMany(Supplier::class, 'item_id', 'item_id');
+    }
+
+    public function company()
+    {
+        return $this->hasManyThrough(Company::class, ItemQuantity::class, 'item_id', 'company_id', 'item_id', 'company_id');
     }
 }

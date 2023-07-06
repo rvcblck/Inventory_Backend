@@ -17,12 +17,8 @@ class AuthController extends ApiController
     {
         try {
 
-            // dd($request->email);
+
             $user = User::where('email', $request->email)->first();
-
-            // $user = User::get();
-
-            // dd($user);
 
             if (!$user) {
                 return $this->errorResponse('invalid credentials', 401);
@@ -32,20 +28,36 @@ class AuthController extends ApiController
                 return $this->errorResponse('invalid credentialssss', 401);
             }
 
-            $role = $user->role->role;
-
+            $role = $user->role->role; // admin, requestor, supplier etc.
 
             $token = $user->createToken('bearer_token')->plainTextToken;
 
-            $admin_id = Role::where('role', 'Admin')->first();
+            $companyInfo = $user->company;
 
-            $admin_id = $admin_id->user;
+            $isRoleAdminId = Role::where('role', 'Admin')->first();
+
+            $admin_id = User::where('role_id', $isRoleAdminId->role_id)
+                ->where('company_id', $companyInfo->company_id)
+                ->first();
+
+
+
+
+
+
+            // dd($companyInfo->company_id);
+
+
+
+
+
 
             $responseData = [
-                'name' => $user->fname.' '.$user->mname.' '.$user->lname.' '.$user->suffix,
+                'name' => $user->fname . ' ' . $user->mname . ' ' . $user->lname . ' ' . $user->suffix,
                 'role' => $role,
                 'user_id' => $user->id,
                 'admin_id' => $admin_id->id,
+                'companyInfo' => $companyInfo,
                 'access_token' => $token,
                 'token_type' => 'Bearer'
 
@@ -53,7 +65,7 @@ class AuthController extends ApiController
             ];
 
 
-            return $this->successResponse($responseData,'User Logged in Successfully');
+            return $this->successResponse($responseData, 'User Logged in Successfully');
         } catch (Exception $e) {
             return $this->errorResponse($e->getMessage(), 500);
         }

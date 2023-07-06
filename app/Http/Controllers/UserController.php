@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UserRequest;
+use App\Models\Role;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -17,8 +18,8 @@ class UserController extends ApiController
         try {
             $users = User::all();
             foreach ($users as $user) {
-                $user->profile_pic = $user->profile_pic ? asset('storage/profile_pic/'.$user->id.'/'. $user->profile_pic) : asset('storage/profile_pic/user-default.png/');
-                $user->logo_url = $user->logo_url ? asset('storage/profile_pic/'.$user->id.'/'. $user->logo) : asset('storage/logo/logo.png/');
+                $user->profile_pic = $user->profile_pic ? asset('storage/profile_pic/' . $user->id . '/' . $user->profile_pic) : asset('storage/profile_pic/user-default.png/');
+                $user->logo_url = $user->logo_url ? asset('storage/profile_pic/' . $user->id . '/' . $user->logo) : asset('storage/logo/logo.png/');
                 $user->role = $user->role->role;
             }
 
@@ -79,6 +80,36 @@ class UserController extends ApiController
             $category->delete();
 
             return $this->successResponse(null, 'Item deleted successfully', 204);
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+    }
+
+    public function requestorCompanies()
+    {
+
+        try {
+            // get role id of admin role
+            $roleId = Role::where('role', 'Admin')->first();
+
+            // get users with that admin role
+            $users = $roleId->user;
+
+            $companies = [];
+
+            foreach ($users as $user) {
+                // get data of thier companies each users
+                $companies[] = $user->company;
+            }
+
+            foreach ($companies as $company) {
+
+                $company->logo_url = $company->logo ? asset('storage/logo/' . $company->company_id . '/' . $company->logo) : asset('storage/logo/logo.png');
+            }
+
+
+
+            return $this->successResponse($companies, 'success', 200);
         } catch (Exception $e) {
             return $this->errorResponse($e->getMessage(), 500);
         }

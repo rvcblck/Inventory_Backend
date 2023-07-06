@@ -19,7 +19,7 @@ class WarehouseSeeder extends Seeder
     {
 
 
-        $role_id = Role::where('role','Warehouse')->first();
+        $role_id = Role::where('role', 'Warehouse')->first();
 
         $faker = Faker::create();
 
@@ -34,6 +34,10 @@ class WarehouseSeeder extends Seeder
             'bday' => $faker->date,
             'contact_no' => $faker->phoneNumber,
             'address' => $faker->address,
+            'company_name' => $faker->company,
+            'company_contact_no' => $faker->phoneNumber,
+            'company_address' => $faker->address,
+            'company_info' =>  $faker->sentence,
             'role_id' => $role_id->role_id,
             'remember_token' => Str::random(10),
             'created_at' => now(),

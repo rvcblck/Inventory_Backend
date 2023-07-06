@@ -21,19 +21,37 @@ class Request extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
+        'company_id',
         'request_number',
         'qr_code',
-        'from',
-        'to',
-        'from_message',
-        'to_message',
-        'archived'
+        'requestor_id',
+        'message',
+        'date_needed',
+        'transaction_type',
+        'admin_checked',
+        'archived',
 
+
+
+    ];
+
+    protected $casts = [
+        'date_needed' => 'datetime',
 
     ];
 
     public function requestList()
     {
         return $this->hasMany(RequestList::class, 'request_id', 'request_id');
+    }
+
+    public function requestor()
+    {
+        return $this->belongsTo(User::class, 'requestor_id', 'id');
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class, 'company_id', 'company_id');
     }
 }

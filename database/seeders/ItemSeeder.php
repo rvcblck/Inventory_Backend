@@ -20,20 +20,18 @@ class ItemSeeder extends Seeder
         DB::table('items')->delete();
 
         $items = [];
-        $role_id = Role::where('role','Supplier')->first();
         $categories = DB::table('categories')->pluck('category_id')->toArray();
-        $supplier = DB::table('users')->where('role_id',$role_id->role_id)->pluck('id')->toArray();
+        $unit = DB::table('units')->pluck('unit_id')->toArray();
+
 
         for ($i = 1; $i <= 50; $i++) {
             $items[] = [
                 'item_id' => Str::uuid()->toString(),
                 'item_name' => 'Item ' . $i,
                 'item_description' => 'Description of Item ' . $i,
-                'item_price' => rand(10, 100),
-                'item_quantity' => rand(1, 100),
+                'unit_id' => $unit[array_rand($unit)],
                 'item_image' => "sample-item.png",
                 'category_id' => $categories[array_rand($categories)],
-                'supplier_id' => $supplier[array_rand($supplier)],
                 'created_at' => now(),
                 'updated_at' => now(),
             ];

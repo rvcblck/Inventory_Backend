@@ -7,6 +7,7 @@ use App\Models\RequestList;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -50,12 +51,13 @@ class RequestController extends ApiController
             // Create a new request
             $requestsItems = ModelsRequest::create([
                 'request_id' => Str::uuid()->toString(),
+                'company_id' => Auth::user()->company_id,
                 'request_number' => $requestNumberMax + 1,
                 'qr_code' => $this->generateUniqueCode(),
-                'from' => $request->from,
-                'to' => $request->to,
-                'from_message' => $request->from_message,
-                'to_message' => $request->to_message,
+                'requestor_id' => $request->requestor_id,
+                'message' => $request->message,
+                'date_needed' => $request->date_needed,
+
 
             ]);
 
@@ -67,8 +69,9 @@ class RequestController extends ApiController
                     'request_list_id' => Str::uuid()->toString(),
                     'request_id' => $requestsItems->request_id,
                     'item_id' => $item['item_id'],
+                    'status' => 'pending',
                     'request_quantity' => $item['count'],
-                    'status' => 'pending'
+
 
                 ]);
             }
@@ -100,10 +103,9 @@ class RequestController extends ApiController
 
 
             foreach ($request->data as $item) {
-                // Find the corresponding request_item in the database by request_item_id
-                $requestItem = RequestList::where('request_list_id', $item['request_list_id'])->first();
 
-                // Update quantity_approved and quantity_disapproved
+                // $requestItem = RequestList::where('request_list_id', $item['request_list_id'])->first();
+                $requestItem = RequestList::findOrFail($item['request_list_id']);
                 $requestItem->request_approved = $item['request_approved'];
                 $requestItem->request_disapproved = $item['request_quantity'] - $item['request_approved'];
                 $requestItem->status = $item['status'];
@@ -112,8 +114,12 @@ class RequestController extends ApiController
                 $requestItem->save();
             }
 
+            $requestUpdate = ModelsRequest::findOrFail($id);
+            $requestUpdate->update([
+                'admin_checked' => $request->admin_checked,
+                'transaction_type' => $request->transaction_type,
 
-
+            ]);
 
             return $this->successResponse(null, 'updated successfully');
         } catch (Exception $e) {
@@ -139,24 +145,27 @@ class RequestController extends ApiController
 
     public function requestFiltered(Request $request)
     {
-
-        $rules = [
-            'date_from' => 'required',
-            'date_to' => 'required',
-        ];
-
-        $validator = Validator::make($request->all(), $rules);
-
-        if ($validator->fails()) {
-            return $this->errorResponse($validator->errors(), 400);
-        }
-
         try {
+            $rules = [
+                'date_from' => 'required',
+                'date_to' => 'required',
+            ];
+
+            $validator = Validator::make($request->all(), $rules);
+
+            if ($validator->fails()) {
+                return $this->errorResponse($validator->errors(), 400);
+            }
+
+
             $dateFrom = $request->input('date_from');
             $dateTo = $request->input('date_to');
 
-            $dateFromString = date('Y-m-d', strtotime($dateFrom));
-            $dateToString = date('Y-m-d', strtotime($dateTo));
+            // $dateFromString = date('Y-m-d', strtotime($dateFrom));
+            // $dateToString = date('Y-m-d', strtotime($dateTo));
+
+            $dateFromString = date('Y-m-d', strtotime('-1 day', strtotime($dateFrom)));
+            $dateToString = date('Y-m-d', strtotime('+1 day', strtotime($dateTo)));
 
             if ($dateFromString === $dateToString) {
 
@@ -188,5 +197,92 @@ class RequestController extends ApiController
         }
 
         return $code;
+    }
+
+
+    public function getRequestPerCompanyFiltered(Request $request)
+    {
+        try {
+            $rules = [
+                'date_from' => 'required',
+                'date_to' => 'required',
+            ];
+
+            $validator = Validator::make($request->all(), $rules);
+
+            if ($validator->fails()) {
+                return $this->errorResponse($validator->errors(), 400);
+            }
+
+
+            $dateFrom = $request->input('date_from');
+            $dateTo = $request->input('date_to');
+
+            $dateFromString = date('Y-m-d', strtotime($dateFrom));
+            $dateToString = date('Y-m-d', strtotime($dateTo));
+
+            // $dateFromString = date('Y-m-d', strtotime('-1 day', strtotime($dateFrom)));
+            // $dateToString = date('Y-m-d', strtotime('+1 day', strtotime($dateTo)));
+
+
+            if ($dateFromString === $dateToString) {
+
+                $requestsItems = Auth::user()->company->request()->whereDate('created_at', $dateFromString)->get();
+            } else {
+
+                $requestsItems = Auth::user()->company->request()->whereBetween('created_at', [$dateFromString, $dateToString])->get();
+            }
+
+
+
+            $requestsList = [];
+
+            foreach ($requestsItems as $requestsItem) {
+                $requestsList[] = $requestsItem->requestList;
+            }
+
+            return $this->successResponse($requestsItems, 'Success', 200);
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+    }
+
+    public function getRequestPerCompany()
+    {
+        try {
+            $requestLists = Auth::user()->company->request;
+
+            foreach ($requestLists as $requestList) {
+                $requestList->requestList;
+            }
+
+            return $this->successResponse($requestLists, 'Success', 200);
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+    }
+
+    public function updateAdminChecked(Request $request, string $id)
+    {
+        try {
+
+            $rules = [
+                'admin_checked' => 'required',
+
+            ];
+
+            $validator = Validator::make($request->all(), $rules);
+
+            if ($validator->fails()) {
+                return $this->errorResponse($validator->errors(), 400);
+            }
+
+            $requestUpdate = ModelsRequest::findOrFail($id);
+            $requestUpdate->update($request->all());
+
+            return $this->successResponse(null, 'Success', 200);
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), 500);
+        }
     }
 }

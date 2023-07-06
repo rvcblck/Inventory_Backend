@@ -14,6 +14,7 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
+        DB::table('categories')->delete();
         $categories = [];
 
         for ($i = 1; $i <= 10; $i++) {

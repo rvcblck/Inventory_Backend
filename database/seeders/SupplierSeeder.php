@@ -33,15 +33,15 @@ class SupplierSeeder extends Seeder
                 'bday' => $faker->date,
                 'contact_no' => $faker->phoneNumber,
                 'address' => $faker->address,
-                'role_id' => $role_id->role_id,
-                'company_name' => 'Company Name'.$i,
+                'company_name' => $faker->company,
                 'company_contact_no' => $faker->phoneNumber,
-                'logo' => 'logo.png',
+                'company_address' => $faker->address,
+                'company_info' =>  $faker->sentence,
+                'role_id' => $role_id->role_id,
                 'remember_token' => Str::random(10),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
         }
-
     }
 }

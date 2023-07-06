@@ -22,6 +22,7 @@ class RolesTableSeeder extends Seeder
             ['role_id' => Str::uuid(), 'role' => 'Requestor', 'created_at' => now(), 'updated_at' => now()],
             ['role_id' => Str::uuid(), 'role' => 'Warehouse', 'created_at' => now(), 'updated_at' => now()],
             ['role_id' => Str::uuid(), 'role' => 'Supplier', 'created_at' => now(), 'updated_at' => now()],
+            ['role_id' => Str::uuid(), 'role' => 'Finance', 'created_at' => now(), 'updated_at' => now()],
         ];
 
         DB::table('roles')->insert($roles);

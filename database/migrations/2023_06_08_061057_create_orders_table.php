@@ -15,20 +15,28 @@ return new class extends Migration
             $table->uuid('order_id')->primary();
             $table->integer('order_number');
             $table->string('qr_code');
-            $table->foreignUuid('from')
+            $table->foreignUuid('company_id')
+                ->references('company_id')
+                ->on('company')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
+            $table->foreignUuid('request_id')
+                ->references('request_id')
+                ->on('request')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
+            $table->foreignUuid('supplier_id')->nullable()
                 ->references('id')
                 ->on('users')
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
-            $table->foreignUuid('to')
-                ->references('id')
-                ->on('users')
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
-            $table->string('order_status')->nullable();
             $table->string('delivery_location')->nullable();
-            $table->date('release_date')->nullable();
-            $table->date('date_delivered')->nullable();
+            $table->string('transaction_type')->nullable(); // Deliver, Pick up, Either Pick Up Or Deliver
+            $table->dateTime('date_needed')->nullable();
+            $table->float('order_total_price')->nullable();
+            $table->boolean('is_bidding')->default(false);
+            $table->dateTime('bidding_start')->nullable();
+            $table->dateTime('bidding_end')->nullable();
             $table->boolean('archived')->default(false);
             $table->timestamps();
         });

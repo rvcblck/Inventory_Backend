@@ -23,8 +23,11 @@ class OrderList extends Model
     protected $fillable = [
         'order_id',
         'item_id',
+        'status',
         'order_quantity',
-        'order_price'
+        'order_completed',
+        'price_per_item',
+        'archived'
 
     ];
 

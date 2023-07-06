@@ -32,9 +32,16 @@ class User extends Authenticatable
         'lname',
         'suffix',
         'bday',
+        'contact_no',
         'address',
+        'profile_pic',
+        'company_name',
+        'company_contact_no',
+        'company_address',
+        'company_info',
+        'logo',
         'role_id',
-        'profile_pic'
+        'archived',
 
     ];
 
@@ -63,6 +70,16 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class, 'role_id', 'role_id');
     }
 
+    public function company()
+    {
+        return $this->belongsTo(Company::class, 'company_id', 'company_id');
+    }
+
+    public function request()
+    {
+        return $this->hasMany(Request::class, 'requestor_id', 'id');
+    }
+
     public function orders()
     {
         return $this->hasMany(Order::class, 'requestor_id', 'id');
@@ -88,5 +105,8 @@ class User extends Authenticatable
         return $this->hasMany(Favorite::class, 'favorite_item_id', 'id');
     }
 
-
+    public function orderBidding()
+    {
+        return $this->hasOne(Order::class, 'supplier_id', 'id');
+    }
 }

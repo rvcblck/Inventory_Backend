@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\ApiController;
 use App\Http\Requests\ItemRequest;
+use Illuminate\Support\Facades\Auth;
 
 class ItemController extends ApiController
 {
@@ -18,8 +19,11 @@ class ItemController extends ApiController
     {
         try {
             $items = Item::all();
+
             foreach ($items as $item) {
-                $item->item_image_url = $item->item_image ? asset('storage/item/' . $item->item_image) : asset('storage/item/sample-item.png' );
+                $item->item_image_url = $item->item_image ? asset('storage/item/' . $item->item_image) : asset('storage/item/sample-item.png');
+                // $item->item_image_url = $item->item_image ? asset('storage/item/' . $item->item_id . '/' . $item->logo) : asset('storage/item/sample-item.png');
+                $item->unit->unit;
             }
 
             return $this->successResponse($items, 'success', 200);
@@ -39,7 +43,7 @@ class ItemController extends ApiController
 
             // check if ImagePic is available in payload
             if ($request->hasFile('item_image')) {
-                $filename = time() .'.' .$request->file('item_image')->getClientOriginalExtension();
+                $filename = time() . '.' . $request->file('item_image')->getClientOriginalExtension();
                 Storage::putFileAs('public/item', $request->file('item_image'), $filename);
                 $item_image['item_image'] = $filename;
             }
@@ -59,7 +63,7 @@ class ItemController extends ApiController
         try {
             $item = Item::findOrFail($id);
 
-            $item->item_image_url = $item->item_image ? asset('storage/item/' . $item->item_image) : asset('storage/item/sample-item.png' );
+            $item->item_image_url = $item->item_image ? asset('storage/item/' . $item->item_image) : asset('storage/item/sample-item.png');
 
             return $this->successResponse($item, 'success', 200);
         } catch (Exception $e) {
@@ -88,15 +92,13 @@ class ItemController extends ApiController
                 $filename = $item_image->getClientOriginalName();
                 $new_filename = $filename;
                 Storage::putFileAs('public/item', $item_image, $new_filename);
-
-
             }
 
             $item = Item::findOrFail($id);
 
             $item->update($request->all());
-            if($new_filename){
-                $item->update(['item_image'=>$new_filename]);
+            if ($new_filename) {
+                $item->update(['item_image' => $new_filename]);
             }
 
             return $this->successResponse($item, 'Item updated successfully', 200);
@@ -116,6 +118,40 @@ class ItemController extends ApiController
             $item->delete();
 
             return $this->successResponse(null, 'Item deleted successfully', 204);
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+    }
+
+    public function getInvetoryPerCompany()
+    {
+        try {
+            $quantities = Auth::user()->company->quantity; // get item quantity per company
+
+            $data = [];
+
+            foreach ($quantities as $quantity) {
+                $items = $quantity->items; // get item detail
+
+                $itemData = [
+                    'item_id' => $items->item_id,
+                    'item_name' => $items->item_name,
+                    'item_description' => $items->item_description,
+                    'unit_id' => $items->unit_id,
+                    'item_image' => $items->item_image,
+                    'category_id' => $items->category_id,
+                    'created_at' => $items->created_at,
+                    'updated_at' => $items->updated_at,
+                    'item_image_url' => $items->item_image ? asset('storage/item/' . $items->item_image) : asset('storage/item/sample-item.png'),
+                    'item_quantity' => $quantity->item_quantity,
+                    'unit' => $items->unit,
+                ];
+
+                $data[] = $itemData;
+            }
+
+
+            return $this->successResponse($data, 'success', 200);
         } catch (Exception $e) {
             return $this->errorResponse($e->getMessage(), 500);
         }

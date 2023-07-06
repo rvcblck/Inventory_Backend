@@ -18,24 +18,22 @@ class Order extends Model
 
     protected $table = 'orders';
     protected $primaryKey = 'order_id';
-    //  protected $keyType = 'string';
+    protected $keyType = 'string';
 
     protected $fillable = [
         'order_number',
+        'company_id',
         'qr_code',
-        'qr_code',
-        'from',
-        'to',
-        'from_message',
-        'to_message',
-        'request_date',
-        'order_status',
+        'request_id',
+        'supplier_id',
         'delivery_location',
-        'release_date',
-        'date_delivered',
-        'archived'
-
-
+        'transaction_type',
+        'date_needed',
+        'order_total_price',
+        'is_bidding',
+        'bidding_start',
+        'bidding_end',
+        'archived',
     ];
 
 
@@ -47,6 +45,7 @@ class Order extends Model
     protected $casts = [
         'release_date' => 'date',
         'date_delivered' => 'date',
+        'date_needed' => 'date',
 
     ];
 
@@ -64,5 +63,10 @@ class Order extends Model
     public function notifications()
     {
         return $this->hasMany(Notification::class, 'order_id', 'order_id');
+    }
+
+    public function supplier()
+    {
+        return $this->hasMany(User::class, 'supplier_id', 'id');
     }
 }

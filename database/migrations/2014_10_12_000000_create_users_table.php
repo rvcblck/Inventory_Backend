@@ -15,6 +15,11 @@ return new class extends Migration
 
         Schema::create('users', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->foreignUuid('company_id')
+                ->references('company_id')
+                ->on('company')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
@@ -24,17 +29,14 @@ return new class extends Migration
             $table->string('suffix')->nullable();
             $table->date('bday')->nullable();
             $table->string('contact_no')->nullable();
-            $table->string('company_name')->nullable();
-            $table->string('company_contact_no')->nullable();
             $table->string('address')->nullable();
-            $table->string('delivery_location')->nullable();
             $table->string('profile_pic')->nullable();
-            $table->string('logo')->nullable();
             $table->foreignUuid('role_id')
-            ->references('role_id')
-            ->on('roles')
-            ->onDelete('cascade')
-            ->onUpdate('cascade');
+                ->references('role_id')
+                ->on('roles')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
+            $table->boolean('archived')->default(false);
             $table->rememberToken();
             $table->timestamps();
         });
